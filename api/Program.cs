@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using api.Data;
 using api.Interface;
 using api.Repository;
@@ -11,7 +12,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 builder.Services.AddControllers();
+builder
+    .Services.AddControllers()
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())

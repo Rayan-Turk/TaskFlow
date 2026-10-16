@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
-using api.Dtos.Project;
+using api.Dtos.ProjectDtos;
 using api.Interface;
 using api.Mappers;
 using Microsoft.AspNetCore.Mvc;
@@ -27,8 +27,8 @@ namespace api.Controller
         {
             var projects = await _ProjectRepo.GetAllAsync();
 
-            var projectDto = projects.Select(p => p.ToProjectDto());
-            return Ok(projectDto);
+            var projectsDto = projects.Select(p => p.ToProjectDto());
+            return Ok(projectsDto);
         }
 
         [HttpGet("{id}")]
