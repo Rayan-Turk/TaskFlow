@@ -4,8 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
 using api.Dtos.Project;
+using api.Interface;
 using api.Mappers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace api.Controller
 {
@@ -13,39 +15,40 @@ namespace api.Controller
     [Route("api/projects")]
     public class ProjectController : ControllerBase
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IProjectRepository _ProjectRepo;
 
-        public ProjectController(ApplicationDbContext dbContext)
+        public ProjectController(IProjectRepository ProjectRepo)
         {
-            _dbContext = dbContext;
+            _ProjectRepo = ProjectRepo;
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var projects = _dbContext.Projects.ToList();
+            var projects = await _ProjectRepo.GetAllAsync();
 
             var projectDto = projects.Select(p => p.ToProjectDto());
             return Ok(projectDto);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var project = _dbContext.Projects.FirstOrDefault(p => p.Id == id);
+            var project = await _ProjectRepo.GetByIdAsync(id);
             if (project == null)
                 return NotFound();
 
-            var projectDto = project.ToProjectDto();
-            return Ok(projectDto);
+            return Ok(project.ToProjectDto());
         }
 
         [HttpPost]
-        public IActionResult CreateProject([FromBody] CreateProjectDto createProjectDto)
+        public async Task<IActionResult> CreateProject([FromBody] CreateProjectDto createProjectDto)
         {
+            // var userExists = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == dto.CreatedByUserId);
+            //if (!userExists)
+            //  return BadRequest("User does not exist.");
             var projectModel = createProjectDto.FromCreateToProject();
-            _dbContext.Projects.Add(projectModel);
-            _dbContext.SaveChanges();
+            await _ProjectRepo.CreateAsync(projectModel);
 
             return CreatedAtAction(
                 nameof(GetById),
@@ -55,29 +58,25 @@ namespace api.Controller
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateProject(int id, [FromBody] UpdateProjectDto updateProjectDto)
+        public async Task<IActionResult> UpdateProject(
+            int id,
+            [FromBody] UpdateProjectDto updateProjectDto
+        )
         {
-            var existingProject = _dbContext.Projects.FirstOrDefault(p => p.Id == id);
+            var existingProject = await _ProjectRepo.UpdateAsync(id, updateProjectDto);
             if (existingProject == null)
                 return NotFound();
-
-            existingProject.Name = updateProjectDto.Name;
-            existingProject.Description = updateProjectDto.Description;
-
-            _dbContext.SaveChanges();
 
             return Ok(existingProject.ToProjectDto());
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteProject(int id)
+        public async Task<IActionResult> DeleteProject(int id)
         {
-            var projectModel = _dbContext.Projects.FirstOrDefault(p => p.Id == id);
+            var projectModel = await _ProjectRepo.DeleteAsync(id);
             if (projectModel == null)
                 return NotFound();
 
-            _dbContext.Projects.Remove(projectModel);
-            _dbContext.SaveChanges();
             return NoContent();
         }
     }
