@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 using api.Dtos.TaskItemDtos;
 using api.Interface;
 using api.Mappers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controller
 {
+    [Authorize]
     [ApiController]
     [Route("api")]
     public class TaskController : ControllerBase
@@ -64,6 +66,7 @@ namespace api.Controller
         }
 
         [HttpDelete("tasks/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteTask(int id)
         {
             var taskModel = await _taskRepo.DeleteAsync(id);

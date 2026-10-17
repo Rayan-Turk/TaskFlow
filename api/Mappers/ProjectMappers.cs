@@ -27,7 +27,6 @@ namespace api.Mappers
             {
                 Name = createProjectDto.Name,
                 Description = createProjectDto.Description,
-                CreatedByUserId = createProjectDto.CreatedByUserId,
             };
         }
     }

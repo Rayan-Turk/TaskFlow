@@ -4,13 +4,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
 using api.Dtos.ProjectDtos;
+using api.Extensions;
 using api.Interface;
 using api.Mappers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Controller
 {
+    [Authorize]
     [ApiController]
     [Route("api/projects")]
     public class ProjectController : ControllerBase
@@ -42,12 +45,14 @@ namespace api.Controller
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateProject([FromBody] CreateProjectDto createProjectDto)
         {
             // var userExists = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == dto.CreatedByUserId);
             //if (!userExists)
             //  return BadRequest("User does not exist.");
             var projectModel = createProjectDto.FromCreateToProject();
+            projectModel.CreatedByUserId = User.GetUserId();
             await _ProjectRepo.CreateAsync(projectModel);
 
             return CreatedAtAction(
@@ -71,6 +76,7 @@ namespace api.Controller
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteProject(int id)
         {
             var projectModel = await _ProjectRepo.DeleteAsync(id);
