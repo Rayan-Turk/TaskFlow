@@ -167,3 +167,5 @@ C:\Users\rayan\Desktop\TaskFlow\api\bin\Debug\net10.0\runtimes\win-arm64\native\
 C:\Users\rayan\Desktop\TaskFlow\api\bin\Debug\net10.0\runtimes\win-x64\native\msalruntime.dll
 C:\Users\rayan\Desktop\TaskFlow\api\bin\Debug\net10.0\runtimes\win-x86\native\msalruntime_x86.dll
 C:\Users\rayan\Desktop\TaskFlow\api\obj\Debug\net10.0\api.sourcelink.json
+C:\Users\rayan\Desktop\TaskFlow\api\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\rayan\Desktop\TaskFlow\api\bin\Debug\net10.0\Microsoft.Bcl.Cryptography.dll

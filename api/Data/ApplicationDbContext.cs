@@ -30,6 +30,8 @@ namespace api.Data
             modelBuilder.Entity<TaskItem>().Property(t => t.Status).HasConversion<string>();
             modelBuilder.Entity<TaskItem>().Property(t => t.Priority).HasConversion<string>();
             modelBuilder.Entity<User>().Property(u => u.Role).HasConversion<string>();
+
+            modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
         }
     }
 }

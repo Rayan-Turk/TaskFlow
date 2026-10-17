@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using api.Data;
 using api.Interface;
 using api.Repository;
+using api.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,8 @@ builder
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
