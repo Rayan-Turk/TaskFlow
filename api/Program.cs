@@ -63,6 +63,13 @@ builder
             ValidateLifetime = true,
         };
     });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "AngularDev",
+        policy => policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod()
+    );
+});
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
@@ -71,6 +78,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AngularDev");
 app.UseAuthentication();
 app.UseAuthorization();
 

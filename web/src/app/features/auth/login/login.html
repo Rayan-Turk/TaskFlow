@@ -1,0 +1,30 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <h1>Log in</h1>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" placeholder="user@example.com" />
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <p class="error">Enter a valid email.</p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" formControlName="password" placeholder="password" />
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <p class="error">Password must be at least 6 characters.</p>
+        }
+      </div>
+
+      @if (errorMessage()) {
+        <p class="error-banner">{{ errorMessage() }}</p>
+      }
+
+      <button type="submit" class="btn-primary">Log in</button>
+    </form>
+    <p class="auth-switch">No account? <a routerLink="/register">Register</a></p>
+  </div>
+</div>
