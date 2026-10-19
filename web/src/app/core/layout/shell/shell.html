@@ -1,0 +1,13 @@
+<header class="topbar">
+  <a class="brand" routerLink="/projects">TaskFlow</a>
+
+  <div class="user">
+    <span class="name">{{ fullName() }}</span>
+    <span class="badge">{{ isAdmin() ? 'Admin' : 'Member' }}</span>
+    <button class="btn-secondary" (click)="logout()">Log out</button>
+  </div>
+</header>
+
+<main>
+  <router-outlet />
+</main>

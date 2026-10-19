@@ -11,6 +11,12 @@ export class AuthService {
   private token = signal<string | null>(localStorage.getItem('token'));
   isLoggedIn = computed(() => this.token() !== null);
 
+  private name = signal<string | null>(localStorage.getItem('fullName'));
+  fullName = computed(() => this.name() ?? '');
+
+  private role = signal<string | null>(localStorage.getItem('role'));
+  isAdmin = computed(() => this.role() === 'Admin');
+
   login(email: string, password: string) {
     return this.http
       .post<AuthResponse>(`${this.apiUrl}/login`, { email, password })
@@ -27,6 +33,8 @@ export class AuthService {
     localStorage.removeItem('fullName');
     localStorage.removeItem('role');
     this.token.set(null);
+    this.name.set(null);
+    this.role.set(null);
   }
 
   getToken() {
@@ -38,5 +46,7 @@ export class AuthService {
     localStorage.setItem('fullName', res.fullName);
     localStorage.setItem('role', res.role);
     this.token.set(res.token);
+    this.name.set(res.fullName);
+    this.role.set(res.role);
   }
 }

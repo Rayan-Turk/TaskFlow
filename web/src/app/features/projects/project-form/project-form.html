@@ -1,1 +1,38 @@
-<p>project-form works!</p>
+<div class="page">
+  <a class="back" routerLink="/projects">&larr; Back to projects</a>
+
+  <div class="form-card">
+    <h1>{{ isEdit ? 'Edit project' : 'New project' }}</h1>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="field">
+        <label for="name">Name</label>
+        <input id="name" formControlName="name" placeholder="e.g. Website redesign" />
+        @if (form.controls.name.touched && form.controls.name.invalid) {
+          <p class="error">Enter a project name.</p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          rows="4"
+          formControlName="description"
+          placeholder="What is this project about? (optional)"
+        ></textarea>
+      </div>
+
+      @if (errorMessage()) {
+        <p class="error-banner">{{ errorMessage() }}</p>
+      }
+
+      <div class="form-actions">
+        <a class="btn-secondary" routerLink="/projects">Cancel</a>
+        <button type="submit" class="btn-primary">
+          {{ isEdit ? 'Save changes' : 'Create project' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

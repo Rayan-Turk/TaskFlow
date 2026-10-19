@@ -1,7 +1,53 @@
-<div class="auth-page">
-  <div class="auth-card">
+<div class="page">
+  <header class="page-header">
     <h1>Projects</h1>
-    <p>You're logged in.</p>
-    <button class="btn-primary" (click)="logout()">Log out</button>
-  </div>
+    <div class="actions">
+      @if (isAdmin()) {
+        <a class="btn-primary" routerLink="/projects/new">New project</a>
+      }
+      <button class="btn-secondary" (click)="logout()">Log out</button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p class="state">Loading projects...</p>
+  } @else if (projects().length === 0) {
+    <div class="state">
+      <h2>No projects yet</h2>
+      @if (isAdmin()) {
+        <p>Create the first one to get started.</p>
+      } @else {
+        <p>An admin hasn't created any projects yet.</p>
+      }
+    </div>
+  } @else {
+    <div class="grid">
+      @for (p of projects(); track p.id) {
+        <article class="card">
+          <h2>{{ p.name }}</h2>
+          @if (p.description) {
+            <p class="description">{{ p.description }}</p>
+          } @else {
+            <p class="description muted">No description</p>
+          }
+          <p class="meta">Created {{ p.createdAt | date: 'mediumDate' }}</p>
+          <div class="card-actions">
+            <a class="btn-secondary" [routerLink]="['/projects', p.id, 'edit']">Edit</a>
+            @if (isAdmin()) {
+              <button class="btn-danger" (click)="askDelete(p)">Delete</button>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  }
+  @if (projectToDelete(); as project) {
+    <app-confirm-dialog
+      title="Delete project"
+      message="Delete {{ project.name }} and all its tasks? This can't be undone."
+      confirmText="Delete"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()"
+    />
+  }
 </div>
