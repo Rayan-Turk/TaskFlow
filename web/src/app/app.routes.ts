@@ -22,7 +22,6 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/projects/projects.routes').then((m) => m.projectRoutes),
       },
-      // tasks, and anything else for logged-in users, goes here later
     ],
   },
   { path: '**', redirectTo: 'projects' },

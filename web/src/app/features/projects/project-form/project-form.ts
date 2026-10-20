@@ -16,7 +16,8 @@ export class ProjectForm {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  private projectId = this.route.snapshot.paramMap.get('id');
+  private idParam = this.route.snapshot.paramMap.get('id');
+  private projectId = this.idParam === null ? null : Number(this.idParam);
   isEdit = this.projectId !== null;
 
   errorMessage = signal('');
@@ -27,10 +28,19 @@ export class ProjectForm {
   });
 
   constructor() {
-    if (this.projectId) {
-      this.projectService.getById(Number(this.projectId)).subscribe({
+    if (this.projectId !== null) {
+      if (Number.isNaN(this.projectId)) {
+        this.router.navigate(['/projects']);
+        return;
+      }
+
+      this.projectService.getById(this.projectId).subscribe({
         next: (project) => this.form.patchValue(project),
-        error: () => this.router.navigate(['/projects']),
+        error: (err: HttpErrorResponse) => {
+          if (err.status === 404) {
+            this.router.navigate(['/projects']);
+          }
+        },
       });
     }
   }
@@ -45,7 +55,7 @@ export class ProjectForm {
 
     const request =
       this.projectId !== null
-        ? this.projectService.update(Number(this.projectId), { name, description })
+        ? this.projectService.update(this.projectId, { name, description })
         : this.projectService.create({ name, description });
 
     request.subscribe({

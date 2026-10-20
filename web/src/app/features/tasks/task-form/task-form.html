@@ -1,1 +1,74 @@
-<p>task-form works!</p>
+<div class="page">
+  <a class="back" [routerLink]="['/projects', projectId, 'tasks']">&larr; Back to tasks</a>
+
+  <div class="form-card">
+    <h1>{{ isEdit ? 'Edit task' : 'New task' }}</h1>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="field">
+        <label for="title">Title</label>
+        <input id="title" formControlName="title" />
+        @if (form.controls.title.touched && form.controls.title.invalid) {
+          <p class="error">Enter a title.</p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="description">Description</label>
+        <textarea id="description" rows="3" formControlName="description"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="status">Status</label>
+        <select id="status" formControlName="status">
+          @for (s of statuses; track s) {
+            <option [value]="s">{{ statusLabels[s] }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="priority">Priority</label>
+        <select id="priority" formControlName="priority">
+          @for (p of priorities; track p) {
+            <option [value]="p">{{ p }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="dueDate">Due date</label>
+        <input id="dueDate" type="date" formControlName="dueDate" />
+        @if (form.controls.dueDate.touched && form.controls.dueDate.invalid) {
+          <p class="error">Pick a due date.</p>
+        }
+      </div>
+
+      @if (!isEdit) {
+        <div class="field">
+          <label for="assignee">Assigned to</label>
+          <select id="assignee" formControlName="assignedToUserId">
+            <option [ngValue]="0">Select a user</option>
+            @for (u of users(); track u.id) {
+              <option [ngValue]="u.id">{{ u.fullName }}</option>
+            }
+          </select>
+          @if (form.controls.assignedToUserId.touched && form.controls.assignedToUserId.invalid) {
+            <p class="error">Choose who this task is assigned to.</p>
+          }
+        </div>
+      }
+
+      @if (errorMessage()) {
+        <p class="error-banner">{{ errorMessage() }}</p>
+      }
+
+      <div class="form-actions">
+        <a class="btn-secondary" [routerLink]="['/projects', projectId, 'tasks']">Cancel</a>
+        <button type="submit" class="btn-primary">
+          {{ isEdit ? 'Save changes' : 'Create task' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

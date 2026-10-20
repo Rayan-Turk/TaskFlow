@@ -32,6 +32,7 @@
           }
           <p class="meta">Created {{ p.createdAt | date: 'mediumDate' }}</p>
           <div class="card-actions">
+            <a class="btn-secondary" [routerLink]="['/projects', p.id, 'tasks']">View tasks</a>
             <a class="btn-secondary" [routerLink]="['/projects', p.id, 'edit']">Edit</a>
             @if (isAdmin()) {
               <button class="btn-danger" (click)="askDelete(p)">Delete</button>

@@ -18,6 +18,11 @@ namespace api.Repository
             _dbContext = dbContext;
         }
 
+        public async Task<List<User>> GetAllAsync()
+        {
+            return await _dbContext.Users.OrderBy(u => u.FullName).ToListAsync();
+        }
+
         public async Task<User?> GetByEmailAsync(string email)
         {
             return await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);

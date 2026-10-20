@@ -17,4 +17,8 @@ export const projectRoutes: Routes = [
     path: ':id/edit',
     component: ProjectForm,
   },
+  {
+    path: ':projectId/tasks',
+    loadChildren: () => import('../tasks/tasks.routes').then((m) => m.taskRoutes),
+  },
 ];
