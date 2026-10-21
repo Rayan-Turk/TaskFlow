@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
+using api.Dtos;
 using api.Dtos.ProjectDtos;
 using api.Extensions;
 using api.Interface;
 using api.Mappers;
+using api.Models;
+using api.Queries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -26,12 +29,19 @@ namespace api.Controller
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] ProjectQuery query)
         {
-            var projects = await _ProjectRepo.GetAllAsync();
+            var result = await _ProjectRepo.GetAllAsync(query);
 
-            var projectsDto = projects.Select(p => p.ToProjectDto());
-            return Ok(projectsDto);
+            var dto = new PagedResultDto<ProjectDto>
+            {
+                Items = result.Items.Select(p => p.ToProjectDto()).ToList(),
+                Page = query.Page,
+                PageSize = query.PageSize,
+                TotalCount = result.TotalCount,
+            };
+
+            return Ok(dto);
         }
 
         [HttpGet("{id}")]

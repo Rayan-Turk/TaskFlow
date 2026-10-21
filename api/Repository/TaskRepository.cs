@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
+using api.Dtos;
 using api.Dtos.TaskItemDtos;
 using api.Interface;
 using api.Models;
+using api.Queries;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Repository
@@ -19,9 +21,36 @@ namespace api.Repository
             _dbContext = dbContext;
         }
 
-        public async Task<List<TaskItem>> GetByProjectIdAsync(int id)
+        public async Task<PagedResultDto<TaskItem>> GetByProjectIdAsync(
+            int projectId,
+            TaskQuery query
+        )
         {
-            return await _dbContext.Tasks.Where(t => t.ProjectId == id).ToListAsync();
+            var tasks = _dbContext.Tasks.Where(t => t.ProjectId == projectId);
+
+            if (query.Status.HasValue)
+                tasks = tasks.Where(t => t.Status == query.Status.Value);
+
+            if (query.Priority.HasValue)
+                tasks = tasks.Where(t => t.Priority == query.Priority.Value);
+
+            if (query.AssigneeId.HasValue)
+                tasks = tasks.Where(t => t.AssignedToUserId == query.AssigneeId.Value);
+
+            var total = await tasks.CountAsync();
+            var items = await tasks
+                .OrderBy(t => t.Id)
+                .Skip((query.Page - 1) * query.PageSize)
+                .Take(query.PageSize)
+                .ToListAsync();
+
+            return new PagedResultDto<TaskItem>
+            {
+                Items = items,
+                Page = query.Page,
+                PageSize = query.PageSize,
+                TotalCount = total,
+            };
         }
 
         public async Task<TaskItem?> GetByIdAsync(int id)

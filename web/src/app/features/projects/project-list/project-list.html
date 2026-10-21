@@ -42,6 +42,12 @@
       }
     </div>
   }
+  <app-pager
+    [page]="page()"
+    [pageSize]="pageSize"
+    [totalCount]="totalCount()"
+    (pageChange)="onPageChange($event)"
+  />
   @if (projectToDelete(); as project) {
     <app-confirm-dialog
       title="Delete project"

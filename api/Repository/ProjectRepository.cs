@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
+using api.Dtos;
 using api.Dtos.ProjectDtos;
 using api.Interface;
 using api.Models;
+using api.Queries;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Repository
@@ -19,9 +21,24 @@ namespace api.Repository
             _dbContext = dbContext;
         }
 
-        public async Task<List<Project>> GetAllAsync()
+        public async Task<PagedResultDto<Project>> GetAllAsync(ProjectQuery query)
         {
-            return await _dbContext.Projects.ToListAsync();
+            var projects = _dbContext.Projects.AsQueryable();
+
+            var total = await projects.CountAsync();
+            var items = await projects
+                .OrderBy(p => p.Id)
+                .Skip((query.Page - 1) * query.PageSize)
+                .Take(query.PageSize)
+                .ToListAsync();
+
+            return new PagedResultDto<Project>
+            {
+                Items = items,
+                Page = query.Page,
+                PageSize = query.PageSize,
+                TotalCount = total,
+            };
         }
 
         public async Task<Project?> GetByIdAsync(int id)

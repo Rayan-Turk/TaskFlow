@@ -1,0 +1,48 @@
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 2rem 0 1rem;
+
+  button {
+    padding: 0.5rem 1rem;
+    background: #1c1c21;
+    color: #fff;
+    border: 1px solid #2e2e36;
+    border-radius: 8px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      border-color 0.15s,
+      color 0.15s;
+
+    &:hover:not(:disabled):not(.active) {
+      border-color: #fbbf24;
+      color: #fbbf24;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    &.active {
+      background: #fbbf24;
+      border-color: #fbbf24;
+      color: #111;
+    }
+  }
+
+  .page-btn {
+    min-width: 2.5rem;
+    padding: 0.5rem 0.75rem;
+  }
+  .dots {
+    color: #9a9aa5;
+    padding: 0 0.25rem;
+    user-select: none;
+  }
+}

@@ -151,3 +151,26 @@
     justify-content: flex-start;
   }
 }
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+
+  select {
+    padding: 0.5rem 0.75rem;
+    background: #1c1c21;
+    color: #fff;
+    border: 1px solid #2e2e36;
+    border-radius: 8px;
+    font: inherit;
+    cursor: pointer;
+
+    &:focus {
+      outline: none;
+      border-color: #fbbf24;
+    }
+  }
+}
