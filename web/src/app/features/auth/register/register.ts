@@ -16,6 +16,7 @@ export class Register {
   private router = inject(Router);
 
   errorMessage = signal('');
+  submitting = signal(false);
 
   form = this.fb.nonNullable.group({
     fullName: ['', [Validators.required]],
@@ -24,6 +25,7 @@ export class Register {
   });
 
   onSubmit() {
+    if (this.submitting()) return;
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -31,13 +33,15 @@ export class Register {
 
     const { fullName, email, password } = this.form.getRawValue();
     this.errorMessage.set('');
+    this.submitting.set(true);
     this.auth.register(fullName, email, password).subscribe({
       next: () => this.router.navigate(['/projects']),
       error: (err: HttpErrorResponse) => {
+        this.submitting.set(false);
         if (err.status === 409) {
           this.errorMessage.set('That email is already registered.');
-        } else {
-          this.errorMessage.set('Something went wrong. Try again.');
+        } else if (err.status === 400) {
+          this.errorMessage.set('Please check the details and try again.');
         }
       },
     });

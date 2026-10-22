@@ -27,7 +27,13 @@
   </div>
 
   @if (loading()) {
-    <p class="state">Loading tasks...</p>
+    <app-spinner label="Loading projects..." />
+  } @else if (loadError()) {
+    <div class="state">
+      <h2>Couldn't load tasks</h2>
+      <p>Check your connection and try again.</p>
+      <button class="btn-secondary" (click)="loadTasks()">Try again</button>
+    </div>
   } @else if (tasks().length === 0) {
     <div class="state">
       @if (statusFilter() || priorityFilter()) {
@@ -65,12 +71,14 @@
       }
     </ul>
   }
-  <app-pager
-    [page]="page()"
-    [pageSize]="pageSize"
-    [totalCount]="totalCount()"
-    (pageChange)="onPageChange($event)"
-  />
+  @if (!loadError()) {
+    <app-pager
+      [page]="page()"
+      [pageSize]="pageSize"
+      [totalCount]="totalCount()"
+      (pageChange)="onPageChange($event)"
+    />
+  }
   @if (taskToDelete(); as task) {
     <app-confirm-dialog
       title="Delete task"

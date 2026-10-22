@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ProjectService } from '../../../core/services/project.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-project-form',
@@ -15,7 +16,9 @@ export class ProjectForm {
   private projectService = inject(ProjectService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private toast = inject(ToastService);
 
+  submitting = signal(false);
   private idParam = this.route.snapshot.paramMap.get('id');
   private projectId = this.idParam === null ? null : Number(this.idParam);
   isEdit = this.projectId !== null;
@@ -38,19 +41,22 @@ export class ProjectForm {
         next: (project) => this.form.patchValue(project),
         error: (err: HttpErrorResponse) => {
           if (err.status === 404) {
-            this.router.navigate(['/projects']);
+            this.toast.show('That project no longer exists.');
           }
+          this.router.navigate(['/projects']);
         },
       });
     }
   }
 
   onSubmit() {
+    if (this.submitting()) return;
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
     this.errorMessage.set('');
+    this.submitting.set(true);
     const { name, description } = this.form.getRawValue();
 
     const request =
@@ -59,13 +65,19 @@ export class ProjectForm {
         : this.projectService.create({ name, description });
 
     request.subscribe({
-      next: () => this.router.navigate(['/projects']),
-      error: (err: HttpErrorResponse) =>
-        this.errorMessage.set(
-          err.status === 403
-            ? 'Only admins can create projects.'
-            : 'Something went wrong. Try again.',
-        ),
+      next: () => {
+        this.toast.show(this.isEdit ? 'Project updated' : 'Project created', 'success');
+        this.router.navigate(['/projects']);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.submitting.set(false);
+        if (err.status === 404) {
+          this.toast.show('That project no longer exists.');
+          this.router.navigate(['/projects']);
+        } else if (err.status === 400) {
+          this.errorMessage.set('Please check the details and try again.');
+        }
+      },
     });
   }
 }

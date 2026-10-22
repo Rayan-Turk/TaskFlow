@@ -6,6 +6,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TaskStatus, TaskPriority } from '../../../core/models/task.model';
 import { User } from '../../../core/models/user.model';
 import { HttpErrorResponse } from '@angular/common/http';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   imports: [RouterLink, ReactiveFormsModule],
@@ -19,11 +20,13 @@ export class TaskForm {
   private userService = inject(UserService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private toast = inject(ToastService);
 
   projectId = Number(this.route.snapshot.paramMap.get('projectId'));
   private idParam = this.route.snapshot.paramMap.get('id');
   private taskId = this.idParam === null ? null : Number(this.idParam);
   isEdit = this.taskId !== null;
+  submitting = signal(false);
 
   users = signal<User[]>([]);
   errorMessage = signal('');
@@ -65,19 +68,22 @@ export class TaskForm {
         next: (task) => this.form.patchValue({ ...task, dueDate: task.dueDate.slice(0, 10) }),
         error: (err: HttpErrorResponse) => {
           if (err.status === 404) {
-            this.router.navigate(['/projects', this.projectId, 'tasks']);
+            this.toast.show('That task no longer exists.');
           }
+          this.router.navigate(['/projects', this.projectId, 'tasks']);
         },
       });
     }
   }
 
   onSubmit() {
+    if (this.submitting()) return;
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
     this.errorMessage.set('');
+    this.submitting.set(true);
 
     const { title, description, status, priority, dueDate, assignedToUserId } =
       this.form.getRawValue();
@@ -95,8 +101,19 @@ export class TaskForm {
         });
 
     request.subscribe({
-      next: () => this.router.navigate(['/projects', this.projectId, 'tasks']),
-      error: () => this.errorMessage.set('Something went wrong. Try again.'),
+      next: () => {
+        this.toast.show(this.isEdit ? 'Task updated' : 'Task created', 'success');
+        this.router.navigate(['/projects', this.projectId, 'tasks']);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.submitting.set(false);
+        if (err.status === 404) {
+          this.toast.show('That task no longer exists.');
+          this.router.navigate(['/projects', this.projectId, 'tasks']);
+        } else if (err.status === 400) {
+          this.errorMessage.set('Please check the details and try again.');
+        }
+      },
     });
   }
 }

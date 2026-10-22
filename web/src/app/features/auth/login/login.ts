@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { Router, RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   imports: [ReactiveFormsModule, RouterLink],
@@ -15,6 +16,7 @@ export class Login {
   private router = inject(Router);
 
   errorMessage = signal('');
+  submitting = signal(false);
 
   form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -22,6 +24,7 @@ export class Login {
   });
 
   onSubmit() {
+    if (this.submitting()) return;
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -29,9 +32,15 @@ export class Login {
 
     const { email, password } = this.form.getRawValue();
     this.errorMessage.set('');
+    this.submitting.set(true);
     this.auth.login(email, password).subscribe({
       next: () => this.router.navigate(['/projects']),
-      error: () => this.errorMessage.set('Invalid email or password'),
+      error: (err: HttpErrorResponse) => {
+        this.submitting.set(false);
+        if (err.status === 401) {
+          this.errorMessage.set('Invalid email or password');
+        }
+      },
     });
   }
 }

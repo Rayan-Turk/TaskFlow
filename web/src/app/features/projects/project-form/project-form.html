@@ -29,8 +29,8 @@
 
       <div class="form-actions">
         <a class="btn-secondary" routerLink="/projects">Cancel</a>
-        <button type="submit" class="btn-primary">
-          {{ isEdit ? 'Save changes' : 'Create project' }}
+        <button type="submit" class="btn-primary" [disabled]="submitting()">
+          {{ submitting() ? 'Saving...' : isEdit ? 'Save changes' : 'Create project' }}
         </button>
       </div>
     </form>

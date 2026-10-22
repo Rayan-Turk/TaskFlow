@@ -1,0 +1,12 @@
+<div class="toast-container">
+  @for (t of toastService.toasts(); track t.id) {
+    <div
+      class="toast"
+      [class.error]="t.type === 'error'"
+      [class.success]="t.type === 'success'"
+      (click)="toastService.dismiss(t.id)"
+    >
+      {{ t.text }}
+    </div>
+  }
+</div>

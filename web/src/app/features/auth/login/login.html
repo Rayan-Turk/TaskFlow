@@ -23,7 +23,9 @@
         <p class="error-banner">{{ errorMessage() }}</p>
       }
 
-      <button type="submit" class="btn-primary">Log in</button>
+      <button type="submit" class="btn-primary" [disabled]="submitting()">
+        {{ submitting() ? 'Please wait...' : 'Log in' }}
+      </button>
     </form>
     <p class="auth-switch">No account? <a routerLink="/register">Register</a></p>
   </div>

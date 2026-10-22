@@ -9,9 +9,11 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import { ConfirmDialog } from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { Pager } from '../../../shared/components/pager/pager';
+import { ToastService } from '../../../core/services/toast.service';
+import { Spinner } from '../../../shared/components/spinner/spinner';
 
 @Component({
-  imports: [RouterLink, DatePipe, ConfirmDialog, Pager],
+  imports: [RouterLink, DatePipe, ConfirmDialog, Pager, Spinner],
   selector: 'app-task-list',
   templateUrl: './task-list.html',
   styleUrl: './task-list.scss',
@@ -22,6 +24,7 @@ export class TaskList {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private auth = inject(AuthService);
+  private toast = inject(ToastService);
   isAdmin = this.auth.isAdmin;
 
   projectId = Number(this.route.snapshot.paramMap.get('projectId'));
@@ -35,6 +38,7 @@ export class TaskList {
   pageSize = 2;
   statusFilter = signal<TaskStatus | ''>('');
   priorityFilter = signal<TaskPriority | ''>('');
+  loadError = signal(false);
 
   statusLabels: Record<TaskStatus, string> = {
     Todo: 'To do',
@@ -70,6 +74,7 @@ export class TaskList {
   }
   loadTasks() {
     this.loading.set(true);
+    this.loadError.set(false);
     this.taskService
       .getByProject(
         this.projectId,
@@ -80,12 +85,19 @@ export class TaskList {
       )
       .subscribe({
         next: (res) => {
+          const lastPage = Math.max(1, Math.ceil(res.totalCount / this.pageSize));
+          if (this.page() > lastPage) {
+            this.page.set(lastPage);
+            this.syncUrl();
+            this.loadTasks();
+            return;
+          }
           this.tasks.set(res.items);
           this.totalCount.set(res.totalCount);
           this.loading.set(false);
         },
-        error: (err) => {
-          console.log('tasks failed', err.status);
+        error: () => {
+          this.loadError.set(true);
           this.loading.set(false);
         },
       });
@@ -148,15 +160,19 @@ export class TaskList {
     this.taskService.delete(task.id).subscribe({
       next: () => {
         this.taskToDelete.set(null);
+        this.toast.show('Task deleted', 'success');
         if (this.tasks().length === 1 && this.page() > 1) {
           this.page.update((p) => p - 1);
         }
         this.syncUrl();
         this.loadTasks();
       },
-      error: (err) => {
-        console.log('delete failed', err.status);
+      error: (err: HttpErrorResponse) => {
         this.taskToDelete.set(null);
+        if (err.status === 404) {
+          this.toast.show('That task no longer exists.');
+          this.loadTasks();
+        }
       },
     });
   }
